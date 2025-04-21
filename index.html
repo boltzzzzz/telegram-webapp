@@ -3,71 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram WebApp</title>
+    <title>Dice Game</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 20px;
-            background: #f0f8ff;
+            background: #1e293b;
+            color: white;
         }
-        #result {
+        .dice {
+            font-size: 48px;
+            margin: 20px;
+        }
+        #debug {
             margin-top: 30px;
             padding: 15px;
+            background: #334155;
             border-radius: 10px;
-            font-weight: bold;
+            text-align: left;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
         }
-        .success { background: #e6f7e6; color: #2e8b57; }
-        .error { background: #ffebee; color: #d32f2f; }
     </style>
 </head>
 <body>
-    <h1>🎮 Игра в кости</h1>
-    <div id="result">Загрузка...</div>
+    <h1>🎲 Dice Game</h1>
+    <div class="dice" id="dice1">?</div>
+    
+    <div id="debug">Loading Telegram WebApp data...</div>
 
     <script>
-        function init() {
-            const result = document.getElementById('result');
+        // 1. Проверяем, есть ли Telegram WebApp
+        function checkTelegram() {
+            const debugEl = document.getElementById('debug');
             
-            // Проверяем, что это Telegram WebApp
+            // 2. Если это Telegram WebApp
             if (window.Telegram?.WebApp?.initData) {
                 const tg = Telegram.WebApp;
-                tg.expand(); // Раскрываем на весь экран
+                tg.expand();
                 
-                // Показываем данные пользователя
-                const user = tg.initDataUnsafe.user;
-                if (user) {
-                    result.innerHTML = `
-                        <p class="success">✅ Вы в игре!</p>
-                        <p>Игрок: <b>${user.first_name || 'Аноним'}</b></p>
-                        ${user.username ? `<p>Username: @${user.username}</p>` : ''}
-                    `;
-                } else {
-                    result.innerHTML = '<p class="success">✅ Готов к игре!</p>';
+                // 3. Показываем все данные для отладки
+                debugEl.innerHTML = `
+✅ Telegram WebApp detected!
+Version: ${tg.version}
+Platform: ${tg.platform}
+
+USER DATA:
+${JSON.stringify(tg.initDataUnsafe.user, null, 2)}
+
+THEME PARAMS:
+${JSON.stringify(tg.themeParams, null, 2)}
+
+FULL INIT DATA:
+${tg.initData}
+                `;
+                
+                // 4. Показываем имя пользователя
+                if (tg.initDataUnsafe.user) {
+                    document.getElementById('dice1').textContent = 
+                        `Hello, ${tg.initDataUnsafe.user.first_name || 'Player'}!`;
                 }
                 
-                // Добавляем кнопку "Закрыть"
-                const closeBtn = document.createElement('button');
-                closeBtn.textContent = 'Закрыть';
-                closeBtn.onclick = () => tg.close();
-                result.appendChild(closeBtn);
-                
             } else {
-                // Режим вне Telegram
-                result.innerHTML = `
-                    <p class="error">❌ Это WebApp Telegram!</p>
-                    <p>Откройте через кнопку меню в <a href="https://t.me/ваш_бот">вашем боте</a>.</p>
-                    <p><small>Если ошибка остаётся, проверьте:</small></p>
-                    <ul style="text-align: left;">
-                        <li>URL в @BotFather: <code>${window.location.href}</code></li>
-                        <li>Используете мобильное приложение Telegram</li>
-                    </ul>
+                // 5. Если это не Telegram
+                debugEl.innerHTML = `
+❌ NOT IN TELEGRAM WEBAPP!
+Open via: https://t.me/your_bot
+
+Debug info:
+Location: ${window.location.href}
+UserAgent: ${navigator.userAgent}
+
+If you see this in Telegram:
+1. Update Telegram app
+2. Use MOBILE version (not web)
+3. Check bot menu URL
                 `;
             }
         }
         
-        // Запускаем при загрузке
-        document.addEventListener('DOMContentLoaded', init);
+        // Запускаем проверку
+        checkTelegram();
     </script>
 </body>
 </html>
