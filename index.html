@@ -3,43 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой WebApp</title>
+    <title>Telegram WebApp</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 20px;
-            background: #f5f5f5;
+            background: #f0f8ff;
         }
-        h1 { color: #2a8bf2; }
-        #result { margin-top: 20px; font-weight: bold; }
+        #result {
+            margin-top: 30px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .success { background: #e6f7e6; color: #2e8b57; }
+        .error { background: #ffebee; color: #d32f2f; }
     </style>
 </head>
 <body>
-    <h1>Telegram WebApp Test</h1>
-    <div id="result">Определение платформы...</div>
+    <h1>🎮 Игра в кости</h1>
+    <div id="result">Загрузка...</div>
 
     <script>
-        function checkPlatform() {
+        function init() {
             const result = document.getElementById('result');
             
+            // Проверяем, что это Telegram WebApp
             if (window.Telegram?.WebApp?.initData) {
                 const tg = Telegram.WebApp;
-                tg.expand();
+                tg.expand(); // Раскрываем на весь экран
                 
-                result.innerHTML = `
-                    ✅ Работает в Telegram!<br>
-                    Версия: ${tg.version}<br>
-                    Пользователь: ${tg.initDataUnsafe.user?.first_name || 'Гость'}
-                `;
-                result.style.color = 'green';
+                // Показываем данные пользователя
+                const user = tg.initDataUnsafe.user;
+                if (user) {
+                    result.innerHTML = `
+                        <p class="success">✅ Вы в игре!</p>
+                        <p>Игрок: <b>${user.first_name || 'Аноним'}</b></p>
+                        ${user.username ? `<p>Username: @${user.username}</p>` : ''}
+                    `;
+                } else {
+                    result.innerHTML = '<p class="success">✅ Готов к игре!</p>';
+                }
+                
+                // Добавляем кнопку "Закрыть"
+                const closeBtn = document.createElement('button');
+                closeBtn.textContent = 'Закрыть';
+                closeBtn.onclick = () => tg.close();
+                result.appendChild(closeBtn);
+                
             } else {
-                result.innerHTML = '❌ Откройте через Telegram-бота';
-                result.style.color = 'red';
+                // Режим вне Telegram
+                result.innerHTML = `
+                    <p class="error">❌ Это WebApp Telegram!</p>
+                    <p>Откройте через кнопку меню в <a href="https://t.me/ваш_бот">вашем боте</a>.</p>
+                    <p><small>Если ошибка остаётся, проверьте:</small></p>
+                    <ul style="text-align: left;">
+                        <li>URL в @BotFather: <code>${window.location.href}</code></li>
+                        <li>Используете мобильное приложение Telegram</li>
+                    </ul>
+                `;
             }
         }
         
-        document.addEventListener('DOMContentLoaded', checkPlatform);
+        // Запускаем при загрузке
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
