@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой WebApp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #2a8bf2; }
+        #result { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Telegram WebApp Test</h1>
+    <div id="result">Определение платформы...</div>
+
+    <script>
+        function checkPlatform() {
+            const result = document.getElementById('result');
+            
+            if (window.Telegram?.WebApp?.initData) {
+                const tg = Telegram.WebApp;
+                tg.expand();
+                
+                result.innerHTML = `
+                    ✅ Работает в Telegram!<br>
+                    Версия: ${tg.version}<br>
+                    Пользователь: ${tg.initDataUnsafe.user?.first_name || 'Гость'}
+                `;
+                result.style.color = 'green';
+            } else {
+                result.innerHTML = '❌ Откройте через Telegram-бота';
+                result.style.color = 'red';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', checkPlatform);
+    </script>
+</body>
+</html>
