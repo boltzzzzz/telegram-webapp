@@ -12,66 +12,67 @@
             background: #1a1a1a;
             color: white;
         }
-        #debug {
-            margin-top: 20px;
-            padding: 15px;
+        pre {
             background: #2d2d2d;
+            padding: 15px;
             border-radius: 10px;
             text-align: left;
-            font-family: monospace;
-            white-space: pre-wrap;
+            overflow-x: auto;
         }
     </style>
 </head>
 <body>
-    <h1>🎲 Dice Game Debug</h1>
-    <div id="debug">Initializing...</div>
+    <h1>🎲 Telegram WebApp Test</h1>
+    <pre id="debug">Loading...</pre>
 
     <script>
-        // Полный дамп всех доступных данных
-        function debug() {
+        // 1. Проверяем, что это Telegram WebApp
+        function check() {
             const debugEl = document.getElementById('debug');
-            let output = '';
-            
-            // 1. Проверяем Telegram WebApp
+            let debugInfo = "";
+
+            // 2. Если Telegram WebApp найден
             if (window.Telegram?.WebApp) {
                 const tg = Telegram.WebApp;
-                tg.expand();
-                
-                output += `=== TELEGRAM WEBAPP DETECTED ===\n`;
-                output += `Version: ${tg.version}\n`;
-                output += `Platform: ${tg.platform}\n`;
-                output += `InitData: ${tg.initData}\n\n`;
-                
-                // 2. Пытаемся получить user data
-                try {
-                    output += `=== USER DATA ===\n`;
-                    output += JSON.stringify(tg.initDataUnsafe.user || 'No user data', null, 2) + '\n\n';
-                    
-                    output += `=== THEME ===\n`;
-                    output += JSON.stringify(tg.themeParams || 'No theme data', null, 2) + '\n';
-                    
-                    // 3. Проверка WebView
-                    output += `\n=== WEBVIEW INFO ===\n`;
-                    output += `UserAgent: ${navigator.userAgent}\n`;
-                    output += `Location: ${window.location.href}\n`;
-                    
-                } catch (e) {
-                    output += `ERROR: ${e.message}\n`;
-                }
+                tg.expand(); // Раскрываем на весь экран
+
+                debugInfo += "✅ Telegram WebApp detected!\n\n";
+                debugInfo += `Version: ${tg.version}\n`;
+                debugInfo += `Platform: ${tg.platform}\n\n`;
+                debugInfo += "User Data:\n";
+                debugInfo += JSON.stringify(tg.initDataUnsafe.user || "No user data", null, 2) + "\n\n";
+                debugInfo += "Theme:\n";
+                debugInfo += JSON.stringify(tg.themeParams || "No theme data", null, 2);
+
+                // 3. Показываем кнопку "Закрыть"
+                const closeBtn = document.createElement('button');
+                closeBtn.textContent = 'Close WebApp';
+                closeBtn.style.marginTop = '20px';
+                closeBtn.style.padding = '10px 20px';
+                closeBtn.style.background = '#5a67d8';
+                closeBtn.style.color = 'white';
+                closeBtn.style.border = 'none';
+                closeBtn.style.borderRadius = '5px';
+                closeBtn.onclick = () => tg.close();
+                document.body.appendChild(closeBtn);
+
             } else {
-                output += `=== TELEGRAM WEBAPP NOT FOUND ===\n`;
-                output += `This page must be opened via Telegram bot menu!\n\n`;
-                output += `Debug info:\n`;
-                output += `UserAgent: ${navigator.userAgent}\n`;
-                output += `Location: ${window.location.href}\n`;
+                // 4. Если это не Telegram WebApp
+                debugInfo += "❌ NOT IN TELEGRAM WEBAPP!\n\n";
+                debugInfo += "How to fix:\n";
+                debugInfo += "1. Open in MOBILE Telegram app (Android/iOS)\n";
+                debugInfo += "2. Use this link: https://t.me/your_bot\n";
+                debugInfo += "3. Check bot menu URL in @BotFather\n\n";
+                debugInfo += "Debug Info:\n";
+                debugInfo += `UserAgent: ${navigator.userAgent}\n`;
+                debugInfo += `URL: ${window.location.href}`;
             }
-            
-            debugEl.textContent = output;
+
+            debugEl.textContent = debugInfo;
         }
-        
-        // Запускаем при загрузке
-        document.addEventListener('DOMContentLoaded', debug);
+
+        // Запускаем проверку
+        document.addEventListener('DOMContentLoaded', check);
     </script>
 </body>
 </html>
