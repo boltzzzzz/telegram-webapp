@@ -2,73 +2,76 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dice Game</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 20px;
-            background: #1e293b;
+            background: #1a1a1a;
             color: white;
         }
-        #mobile-only {
-            display: none;
-            margin-top: 30px;
-            padding: 20px;
-            background: #dc2626;
+        #debug {
+            margin-top: 20px;
+            padding: 15px;
+            background: #2d2d2d;
             border-radius: 10px;
+            text-align: left;
+            font-family: monospace;
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
-    <div id="app">
-        <h1>🎲 Dice Game</h1>
-        <p id="status">Определение платформы...</p>
-    </div>
-
-    <div id="mobile-only">
-        <h2>❌ Доступ только в мобильном Telegram!</h2>
-        <p>Откройте этого бота в <b>официальном мобильном приложении</b> Telegram:</p>
-        <p><a href="https://t.me/ваш_бот" style="color: #93c5fd;">t.me/ваш_бот</a></p>
-    </div>
+    <h1>🎲 Dice Game Debug</h1>
+    <div id="debug">Initializing...</div>
 
     <script>
-        // Проверяем мобильное приложение Telegram
-        function init() {
-            const appEl = document.getElementById('app');
-            const mobileOnlyEl = document.getElementById('mobile-only');
-            const statusEl = document.getElementById('status');
-
-            if (window.Telegram?.WebApp?.initData) {
+        // Полный дамп всех доступных данных
+        function debug() {
+            const debugEl = document.getElementById('debug');
+            let output = '';
+            
+            // 1. Проверяем Telegram WebApp
+            if (window.Telegram?.WebApp) {
                 const tg = Telegram.WebApp;
+                tg.expand();
                 
-                // Проверяем, что это MOBILE (не web/desktop)
-                if (tg.platform === 'android' || tg.platform === 'ios') {
-                    tg.expand();
-                    statusEl.innerHTML = `
-                        ✅ Привет, ${tg.initDataUnsafe.user?.first_name || 'Игрок'}!<br>
-                        <small>ID: ${tg.initDataUnsafe.user?.id || 'неизвестен'}</small>
-                    `;
-                } else {
-                    // Это Telegram Web/Desktop - показываем ошибку
-                    appEl.style.display = 'none';
-                    mobileOnlyEl.style.display = 'block';
-                    mobileOnlyEl.innerHTML += `
-                        <p><b>Обнаружена платформа:</b> ${tg.platform}</p>
-                        <p>Используйте <b>мобильное приложение</b> Telegram!</p>
-                    `;
+                output += `=== TELEGRAM WEBAPP DETECTED ===\n`;
+                output += `Version: ${tg.version}\n`;
+                output += `Platform: ${tg.platform}\n`;
+                output += `InitData: ${tg.initData}\n\n`;
+                
+                // 2. Пытаемся получить user data
+                try {
+                    output += `=== USER DATA ===\n`;
+                    output += JSON.stringify(tg.initDataUnsafe.user || 'No user data', null, 2) + '\n\n';
+                    
+                    output += `=== THEME ===\n`;
+                    output += JSON.stringify(tg.themeParams || 'No theme data', null, 2) + '\n';
+                    
+                    // 3. Проверка WebView
+                    output += `\n=== WEBVIEW INFO ===\n`;
+                    output += `UserAgent: ${navigator.userAgent}\n`;
+                    output += `Location: ${window.location.href}\n`;
+                    
+                } catch (e) {
+                    output += `ERROR: ${e.message}\n`;
                 }
             } else {
-                // Это не Telegram вообще
-                appEl.style.display = 'none';
-                mobileOnlyEl.style.display = 'block';
-                mobileOnlyEl.innerHTML += `
-                    <p><b>UserAgent:</b> ${navigator.userAgent}</p>
-                `;
+                output += `=== TELEGRAM WEBAPP NOT FOUND ===\n`;
+                output += `This page must be opened via Telegram bot menu!\n\n`;
+                output += `Debug info:\n`;
+                output += `UserAgent: ${navigator.userAgent}\n`;
+                output += `Location: ${window.location.href}\n`;
             }
+            
+            debugEl.textContent = output;
         }
-
-        document.addEventListener('DOMContentLoaded', init);
+        
+        // Запускаем при загрузке
+        document.addEventListener('DOMContentLoaded', debug);
     </script>
 </body>
 </html>
